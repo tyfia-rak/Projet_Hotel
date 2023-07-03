@@ -1,4 +1,4 @@
-BDD-Gestion d'hôtel
+Base de Donnée - Gestion d'une chaine d'hôtel
 
 Description:
 Bienvenue dans notre projet !
