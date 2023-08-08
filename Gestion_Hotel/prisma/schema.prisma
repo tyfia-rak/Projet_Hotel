@@ -1,0 +1,198 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model province_available {
+  id_province   Int     @id @default(autoincrement())
+  province_name String
+  code_province Int
+  hotel         hotel[]
+}
+
+model hotel {
+  id_hotel     Int                @id @default(autoincrement())
+  hotel_name   String
+  address      String
+  id_province  Int
+  province     province_available @relation(fields: [id_province], references: [id_province])
+  receptionist receptionist[]
+  room         room[]
+}
+
+model receptionist {
+  id_employee  Int       @id @default(autoincrement())
+  first_name   String
+  last_name    String
+  password     String
+  email        String
+  work_contact Int
+  id_hotel     Int
+  client       client[]
+  payment      payment[]
+  hotel        hotel     @relation(fields: [id_hotel], references: [id_hotel])
+}
+
+model client {
+  id_client         Int             @id @default(autoincrement())
+  name              String
+  last_name         String
+  principal_contact String
+  address           String
+  emergency_number  String
+  gender            String
+  CIN               Int
+  email             String
+  password          String
+  id_employee       Int
+  buy               buy[]
+  receptionist      receptionist    @relation(fields: [id_employee], references: [id_employee])
+  feedback          feedback[]
+  payment           payment[]
+  reservation       reservation[]
+  status_client     status_client[]
+}
+
+model service {
+  id_service   Int    @id @default(autoincrement())
+  service_name String
+  description  String
+  price        Float
+  reduction    Float
+  buy          buy[]
+}
+
+model buy {
+  id_buy     Int     @id @default(autoincrement())
+  id_client  Int
+  id_service Int
+  client     client  @relation(fields: [id_client], references: [id_client])
+  service    service @relation(fields: [id_service], references: [id_service])
+}
+
+model feedback {
+  id_feedback Int    @id @default(autoincrement())
+  comment     String
+  rating      Int
+  id_client   Int
+  client      client @relation(fields: [id_client], references: [id_client])
+}
+
+model status_client {
+  id_status_client Int     @id
+  status_arrived   Int
+  status_missing   Int
+  in_fidelity      Boolean
+  in_blacklist     Boolean
+  id_client        Int
+  client           client  @relation(fields: [id_client], references: [id_client])
+}
+
+model reservation {
+  id_reservation   Int      @id
+  date_arrived     DateTime
+  leaving_date     DateTime
+  number_of_person Int
+  is_canceled      Boolean
+  id_client        Int
+  client           client   @relation(fields: [id_client], references: [id_client])
+  room             room[]
+}
+
+model payment {
+  id_payment          Int          @id @default(autoincrement())
+  payment_date        DateTime
+  amount_paid         Float
+  number_night        Int
+  room_occupied       Int
+  deadline_payment    String
+  lending_status      Boolean
+  total_amount_status Boolean
+  id_client           Int
+  id_employee         Int
+  choose              choose[]
+  client              client       @relation(fields: [id_client], references: [id_client])
+  receptionist        receptionist @relation(fields: [id_employee], references: [id_employee])
+}
+
+model payment_method {
+  id_payment_method Int      @id @default(autoincrement())
+  mobile_money      Boolean
+  credit_card       Boolean
+  cash              Boolean
+  choose            choose[]
+}
+
+model choose {
+  id_choose         Int            @id @default(autoincrement())
+  id_payment        Int
+  id_payment_method Int
+  payment           payment        @relation(fields: [id_payment], references: [id_payment])
+  payment_method    payment_method @relation(fields: [id_payment_method], references: [id_payment_method])
+}
+
+model room_features {
+  id_features    Int     @id
+  sea_view       Boolean
+  vip_category   Boolean
+  hot_water      Boolean
+  wifi_available Boolean
+  room_service   Boolean
+  mini_bar       Boolean
+  flat_screen    Boolean
+  room           room[]
+}
+
+model room {
+  id_room        Int           @id @default(autoincrement())
+  number         String
+  room_type      String
+  capacity_room  Int
+  id_reservation Int
+  id_hotel       Int
+  id_features    Int
+  have           have[]
+  price          price[]
+  features       room_features @relation(fields: [id_features], references: [id_features])
+  hotel          hotel         @relation(fields: [id_hotel], references: [id_hotel])
+  reservation    reservation   @relation(fields: [id_reservation], references: [id_reservation])
+}
+
+model promotion {
+  id_promotion Int      @id @default(autoincrement())
+  name         String
+  begin        DateTime
+  end          DateTime
+  percent      Int
+  have         have[]
+}
+
+model have {
+  id_have      Int       @id @default(autoincrement())
+  id_room      Int
+  id_promotion Int
+  promotion    promotion @relation(fields: [id_promotion], references: [id_promotion])
+  room         room      @relation(fields: [id_room], references: [id_room])
+}
+
+model season {
+  id_season  Int      @id
+  times      String
+  start_date DateTime
+  end_date   DateTime
+  price      price[]
+}
+
+model price {
+  id_price_by_season Int    @id @default(autoincrement())
+  cost_per_night     Float
+  id_room            Int
+  id_season          Int
+  room               room   @relation(fields: [id_room], references: [id_room])
+  season             season @relation(fields: [id_season], references: [id_season])
+}
